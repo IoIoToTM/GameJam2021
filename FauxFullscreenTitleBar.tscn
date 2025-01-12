@@ -1,0 +1,187 @@
+[gd_scene load_steps=4 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends MarginContainer
+
+var click_offset = Vector2()
+var scale_factor = Vector2()
+
+onready var tween = get_node(\"FadeTween\")
+
+export(bool) var auto_borderless = true
+export(bool) var auto_maximize = false
+export(Vector2) var game_dimensions = Vector2(1920, 1080)
+
+func _ready():
+	
+	tween.remove_all()
+	tween.interpolate_property(self, \"modulate\", modulate, Color(1.0, 1.0, 1.0, 1.0), 0.4,Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
+	tween.start()
+	
+	set_process(false)
+	OS.window_borderless = auto_borderless
+	modulate = Color(1.0, 1.0, 1.0, 0.0)
+	if auto_maximize:
+		get_node(\"HBoxContainer/Maximize\").pressed = true
+		_on_Maximize_toggled(true)
+	#var csharp = load(\"res://TestScene.cs\")
+	#var node = csharp.new()
+	#node.test()
+
+func _process(delta):
+	OS.window_position += get_global_mouse_position() * scale_factor - click_offset
+
+func _on_gui_input(event):
+	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT:
+		if event.pressed and not OS.window_maximized:
+			scale_factor = OS.window_size / game_dimensions
+			click_offset = get_global_mouse_position() * scale_factor
+			set_process(true)
+		else:
+			set_process(false)
+
+
+func _on_Minimize_pressed():
+	OS.window_minimized = true
+
+func _on_CloseButton_pressed():
+	get_tree().quit()
+
+func _on_Maximize_toggled(button_pressed):
+	OS.window_maximized = button_pressed
+
+
+func _on_TitleBar_mouse_entered():
+	tween.remove_all()
+	tween.interpolate_property(self, \"modulate\", modulate, Color(1.0, 1.0, 1.0, 1.0), 0.4,Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
+	tween.start()
+
+func _on_TitleBar_mouse_exited():
+	tween.remove_all()
+	tween.interpolate_property(self, \"modulate\", modulate, Color(1.0, 1.0, 1.0, 0.0), 0.4,Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
+	tween.start()
+
+
+"
+
+[sub_resource type="GDScript" id=2]
+script/source = "tool
+extends ColorRect
+
+var upper_tint = Color(color.r, color.g, color.b, 0.5)
+var lower_tint = Color(color.r, color.g, color.b, 0.01)
+
+func _ready():
+	color.a = 0.0
+
+func _draw():
+	var rect_points = PoolVector2Array()
+	var point_colors = PoolColorArray()
+	
+	rect_points.append(rect_position)
+	point_colors.append(upper_tint)
+	
+	rect_points.append(Vector2(rect_position.x + rect_size.x, rect_position.y))
+	point_colors.append(upper_tint)
+	
+	rect_points.append(rect_position + rect_size)
+	point_colors.append(lower_tint)
+	
+	rect_points.append(Vector2(rect_position.x, rect_position.y + rect_size.y))
+	point_colors.append(lower_tint)
+	
+	draw_polygon(rect_points, point_colors)
+"
+
+[sub_resource type="GDScript" id=3]
+script/source = "extends Label
+
+func _ready():
+	text = ProjectSettings.get(\"application/config/name\")
+"
+
+[node name="TitleBar" type="MarginContainer"]
+pause_mode = 2
+anchor_right = 1.0
+margin_bottom = 32.0
+rect_min_size = Vector2( 0, 32 )
+script = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="."]
+margin_right = 1024.0
+margin_bottom = 32.0
+mouse_filter = 2
+color = Color( 1, 0, 0, 0 )
+script = SubResource( 2 )
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+margin_right = 1024.0
+margin_bottom = 32.0
+custom_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="HBoxContainer"]
+margin_right = 32.0
+margin_bottom = 32.0
+rect_min_size = Vector2( 32, 32 )
+expand = true
+stretch_mode = 1
+
+[node name="AppTitle" type="Label" parent="HBoxContainer"]
+margin_left = 40.0
+margin_right = 92.0
+margin_bottom = 32.0
+size_flags_vertical = 5
+text = "Untitled"
+valign = 1
+script = SubResource( 3 )
+
+[node name="Empty" type="Control" parent="HBoxContainer"]
+margin_left = 100.0
+margin_right = 942.0
+margin_bottom = 32.0
+mouse_filter = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Minimize" type="Button" parent="HBoxContainer"]
+margin_left = 950.0
+margin_right = 968.0
+margin_bottom = 32.0
+focus_mode = 0
+mouse_filter = 1
+enabled_focus_mode = 0
+text = "_"
+flat = true
+
+[node name="Maximize" type="Button" parent="HBoxContainer"]
+margin_left = 976.0
+margin_right = 996.0
+margin_bottom = 32.0
+focus_mode = 0
+mouse_filter = 1
+toggle_mode = true
+enabled_focus_mode = 0
+text = "[]"
+flat = true
+
+[node name="CloseButton" type="Button" parent="HBoxContainer"]
+margin_left = 1004.0
+margin_right = 1024.0
+margin_bottom = 32.0
+focus_mode = 0
+mouse_filter = 1
+enabled_focus_mode = 0
+text = "X"
+flat = true
+
+[node name="FadeTween" type="Tween" parent="."]
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]
+[connection signal="mouse_entered" from="." to="." method="_on_TitleBar_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_TitleBar_mouse_exited"]
+[connection signal="pressed" from="HBoxContainer/Minimize" to="." method="_on_Minimize_pressed"]
+[connection signal="toggled" from="HBoxContainer/Maximize" to="." method="_on_Maximize_toggled"]
+[connection signal="pressed" from="HBoxContainer/CloseButton" to="." method="_on_CloseButton_pressed"]

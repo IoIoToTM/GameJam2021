@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=2]
+
+[sub_resource type="Environment" id=1]
+background_mode = 1
+background_color = Color( 0, 0, 0, 0 )
+ambient_light_color = Color( 0.337255, 0.309804, 0.309804, 1 )
+
+[sub_resource type="CubeMesh" id=2]
+
+[node name="Spatial" type="Spatial"]
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.944049, 0.329806, 0, -0.329806, 0.944049, -0.0072422, 2.43871, 7.09669 )
+environment = SubResource( 1 )
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+mesh = SubResource( 2 )
+material/0 = null
+
+[node name="SpotLight" type="SpotLight" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.09316, 0 )
+spot_range = 10.4933
+spot_angle = 89.99

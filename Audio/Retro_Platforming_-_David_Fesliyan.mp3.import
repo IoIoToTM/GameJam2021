@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Retro_Platforming_-_David_Fesliyan.mp3-5bbcb96272ef7a1d988b81f68ddaccc0.mp3str"
+
+[deps]
+
+source_file="res://Audio/Retro_Platforming_-_David_Fesliyan.mp3"
+dest_files=[ "res://.import/Retro_Platforming_-_David_Fesliyan.mp3-5bbcb96272ef7a1d988b81f68ddaccc0.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0
